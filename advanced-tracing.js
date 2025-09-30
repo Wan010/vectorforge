@@ -386,4 +386,32 @@ class AdvancedTracer {
         const ctx = base.getContext('2d');
         const baseData = ctx.getImageData(0, 0, base.width, base.height);
         const blendCtx = blend.getContext('2d');
-        const blendData = blendCtx.getImageData(0, 0, blend.width
+        const blendData = blendCtx.getImageData(0, 0, blend.width, blend.height);
+        
+        const output = new ImageData(base.width, base.height);
+        
+        for (let i = 0; i < baseData.data.length; i += 4) {
+            const baseValue = baseData.data[i];
+            const blendValue = blendData.data[i];
+            
+            let result;
+            if (blendValue === 255) {
+                result = 255;
+            } else {
+                result = Math.min(255, (baseValue << 8) / (255 - blendValue));
+            }
+            
+            output.data[i] = result;
+            output.data[i + 1] = result;
+            output.data[i + 2] = result;
+            output.data[i + 3] = 255;
+        }
+        
+        ctx.putImageData(output, 0, 0);
+        return base;
+    }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AdvancedTracer };
+}
