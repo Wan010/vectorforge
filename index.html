@@ -7,30 +7,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
             --primary-dark: #4f46e5;
+            --primary-light: #c7d2fe;
             --secondary: #10b981;
             --accent: #f59e0b;
             --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
             --light: #f8fafc;
             --dark: #1e293b;
             --gray: #64748b;
             --gray-light: #e2e8f0;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --radius: 12px;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 16px;
+            --radius-sm: 8px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .dark-mode {
             --primary: #818cf8;
             --primary-dark: #6366f1;
-            --light: #1e293b;
+            --primary-light: #3730a3;
+            --light: #0f172a;
             --dark: #f1f5f9;
             --gray: #94a3b8;
-            --gray-light: #334155;
-            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --gray-light: #1e293b;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --gradient: linear-gradient(135deg, #1e3a8a 0%, #701a75 100%);
         }
 
         * {
@@ -41,25 +50,74 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--gradient);
             min-height: 100vh;
             padding: 20px;
             transition: var(--transition);
-        }
-
-        body.dark-mode {
-            background: linear-gradient(135deg, #1e3a8a 0%, #701a75 100%);
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
+        }
+
+        /* Floating Background Elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            top: 60%;
+            right: 10%;
+            animation-duration: 20s;
+            animation-direction: reverse;
+        }
+
+        .floating-element:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            bottom: 20%;
+            left: 20%;
+            animation-duration: 15s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, 50px) rotate(90deg); }
+            50% { transform: translate(0, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 50px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
         }
 
         /* Header & Navigation */
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 1.5rem 2rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
@@ -68,10 +126,23 @@
             justify-content: space-between;
             align-items: center;
             transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
 
-        body.dark-mode header {
-            background: rgba(30, 41, 59, 0.95);
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        header:hover::before {
+            left: 100%;
         }
 
         .logo {
@@ -81,23 +152,25 @@
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             background: var(--primary);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
         .logo-text {
-            font-size: 1.8rem;
-            font-weight: 700;
+            font-size: 2rem;
+            font-weight: 800;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.2);
         }
 
         .header-actions {
@@ -108,9 +181,9 @@
 
         /* Control Buttons */
         .control-btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -118,46 +191,65 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
         }
 
         .btn-primary {
             background: var(--primary);
             color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
 
         .btn-secondary {
-            background: var(--gray-light);
+            background: rgba(255, 255, 255, 0.1);
             color: var(--dark);
-        }
-
-        body.dark-mode .btn-secondary {
-            background: var(--gray);
-            color: var(--light);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-secondary:hover {
-            background: var(--gray);
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
         }
 
         .btn-success {
             background: var(--secondary);
             color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
 
         .btn-success:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+            background: #0da271;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
         }
 
         .btn-danger {
             background: var(--danger);
             color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
         /* Main App Layout */
@@ -169,16 +261,13 @@
 
         /* Form Styling */
         .form-section {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 2rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             transition: var(--transition);
-        }
-
-        body.dark-mode .form-section {
-            background: rgba(30, 41, 59, 0.95);
         }
 
         .section-title {
@@ -187,25 +276,21 @@
             gap: 12px;
             margin-bottom: 1.5rem;
             padding-bottom: 0.75rem;
-            border-bottom: 2px solid var(--gray-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--dark);
             transition: var(--transition);
         }
 
-        body.dark-mode .section-title {
-            color: var(--light);
-            border-bottom-color: var(--gray);
-        }
-
         .section-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             background: var(--primary);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
         }
 
         .form-grid {
@@ -230,57 +315,45 @@
             transition: var(--transition);
         }
 
-        body.dark-mode label {
-            color: var(--light);
-        }
-
         .input-group {
             position: relative;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 14px;
-            border: 2px solid var(--gray-light);
-            border-radius: 8px;
+            padding: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
             font-size: 16px;
             transition: var(--transition);
-            background: var(--light);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
             color: var(--dark);
-        }
-
-        body.dark-mode input,
-        body.dark-mode select,
-        body.dark-mode textarea {
-            background: var(--gray-light);
-            color: var(--light);
-            border-color: var(--gray);
         }
 
         input:focus, select:focus, textarea:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .input-icon {
             position: absolute;
-            right: 14px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--gray);
         }
 
-        /* Items Table */
+        /* Enhanced Items Table */
         .items-table-container {
             overflow-x: auto;
             margin: 1.5rem 0;
-            border-radius: 8px;
-            border: 1px solid var(--gray-light);
-        }
-
-        body.dark-mode .items-table-container {
-            border-color: var(--gray);
+            border-radius: var(--radius-sm);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
 
         .items-table {
@@ -292,19 +365,21 @@
         .items-table th {
             background: var(--primary);
             color: white;
-            padding: 16px;
+            padding: 18px;
             text-align: left;
             font-weight: 600;
+            position: sticky;
+            top: 0;
         }
 
         .items-table td {
             padding: 16px;
-            border-bottom: 1px solid var(--gray-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: var(--transition);
         }
 
-        body.dark-mode .items-table td {
-            border-bottom-color: var(--gray);
+        .items-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .items-table input {
@@ -312,11 +387,13 @@
             padding: 8px;
             width: 100%;
             background: transparent;
+            border: 1px solid transparent;
         }
 
         .items-table input:focus {
             border: 2px solid var(--primary);
             border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .action-buttons {
@@ -325,24 +402,44 @@
         }
 
         .btn-icon {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-icon:hover::before {
+            left: 100%;
         }
 
         .btn-icon-danger {
             background: var(--danger);
             color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .btn-icon-danger:hover {
             background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
 
         /* Preview Section */
@@ -353,16 +450,13 @@
         }
 
         .preview-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 2rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             transition: var(--transition);
-        }
-
-        body.dark-mode .preview-container {
-            background: rgba(30, 41, 59, 0.95);
         }
 
         .preview-header {
@@ -371,17 +465,14 @@
             align-items: flex-start;
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
-            border-bottom: 2px solid var(--gray-light);
-        }
-
-        body.dark-mode .preview-header {
-            border-bottom-color: var(--gray);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .invoice-title {
             font-size: 2.5rem;
             font-weight: 800;
             color: var(--primary);
+            text-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
         }
 
         .invoice-meta {
@@ -399,30 +490,27 @@
             width: 100%;
             border-collapse: collapse;
             margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
         }
 
         .preview-table th {
-            background: var(--gray-light);
-            padding: 14px;
+            background: var(--primary);
+            padding: 16px;
             text-align: left;
             font-weight: 600;
-            color: var(--dark);
-            transition: var(--transition);
-        }
-
-        body.dark-mode .preview-table th {
-            background: var(--gray);
-            color: var(--light);
+            color: white;
         }
 
         .preview-table td {
-            padding: 14px;
-            border-bottom: 1px solid var(--gray-light);
+            padding: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             transition: var(--transition);
         }
 
-        body.dark-mode .preview-table td {
-            border-bottom-color: var(--gray);
+        .preview-table tr:hover td {
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .text-right {
@@ -432,11 +520,7 @@
         .totals-section {
             margin-top: 2rem;
             padding-top: 1.5rem;
-            border-top: 2px solid var(--gray-light);
-        }
-
-        body.dark-mode .totals-section {
-            border-top-color: var(--gray);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .total-row {
@@ -444,6 +528,7 @@
             justify-content: space-between;
             margin-bottom: 0.75rem;
             font-size: 1.1rem;
+            padding: 8px 0;
         }
 
         .grand-total {
@@ -452,6 +537,7 @@
             color: var(--primary);
             border-top: 2px solid var(--primary);
             padding-top: 0.75rem;
+            text-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
         }
 
         /* Footer Actions */
@@ -492,6 +578,7 @@
             background-color: var(--gray);
             transition: var(--transition);
             border-radius: 34px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .toggle-slider:before {
@@ -504,6 +591,7 @@
             background-color: white;
             transition: var(--transition);
             border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         input:checked + .toggle-slider {
@@ -514,24 +602,101 @@
             transform: translateX(26px);
         }
 
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark);
+            opacity: 0.8;
+        }
+
         /* Animations */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         .animate-in {
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .animate-slide {
+            animation: slideIn 0.6s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
         }
 
         /* Responsive Design */
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .app-container {
                 grid-template-columns: 1fr;
             }
             
             .preview-section {
                 position: static;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -548,6 +713,10 @@
                 grid-template-columns: 1fr;
             }
             
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
             header {
                 flex-direction: column;
                 gap: 1rem;
@@ -561,11 +730,17 @@
     </style>
 </head>
 <body>
+    <div class="floating-elements">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+    </div>
+
     <div class="container">
         <!-- Header -->
-        <header>
+        <header class="animate-in">
             <div class="logo">
-                <div class="logo-icon">
+                <div class="logo-icon pulse">
                     <i class="fas fa-receipt"></i>
                 </div>
                 <div class="logo-text">InvoiceFlow Pro</div>
@@ -588,9 +763,30 @@
             </div>
         </header>
 
+        <!-- Stats Cards -->
+        <div class="stats-container animate-in">
+            <div class="stat-card">
+                <div class="stat-value" id="totalInvoices">0</div>
+                <div class="stat-label">Total Invoices</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalRevenue">$0</div>
+                <div class="stat-label">Total Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completionRate">0%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+        </div>
+
         <div class="app-container">
             <!-- Form Section -->
             <div class="form-section animate-in">
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="formProgress"></div>
+                </div>
+
                 <!-- Business Information -->
                 <div class="form-group">
                     <div class="section-title">
@@ -825,7 +1021,7 @@
             <!-- Preview Section -->
             <div class="preview-section animate-in">
                 <div class="preview-container">
-                    <h2 style="margin-bottom: 1.5rem; color: var(--dark);">Invoice Preview</h2>
+                    <h2 style="margin-bottom: 1.5rem; color: var(--dark); text-align: center;">Invoice Preview</h2>
                     
                     <div class="invoice-preview" id="invoicePreview">
                         <div class="preview-header">
@@ -939,6 +1135,8 @@
             // Do initial calculation
             calculateTotals();
             updatePreview();
+            updateStats();
+            updateProgressBar();
         });
 
         function initializeEventListeners() {
@@ -965,7 +1163,11 @@
             inputFields.forEach(field => {
                 const element = document.getElementById(field);
                 if (element) {
-                    element.addEventListener('input', updatePreview);
+                    element.addEventListener('input', function() {
+                        updatePreview();
+                        updateProgressBar();
+                        updateStats();
+                    });
                 }
             });
             
@@ -977,6 +1179,8 @@
                     calculateItemAmount(e.target);
                     calculateTotals();
                     updatePreview();
+                    updateProgressBar();
+                    updateStats();
                 }
             });
             
@@ -986,6 +1190,8 @@
                     removeItem(e.target.closest('.remove-item'));
                     calculateTotals();
                     updatePreview();
+                    updateProgressBar();
+                    updateStats();
                 }
             });
             
@@ -1132,6 +1338,64 @@
             calculateTotals();
         }
 
+        function updateProgressBar() {
+            let progress = 0;
+            const fields = [
+                'businessName', 'businessEmail', 'businessAddress',
+                'clientName', 'clientEmail',
+                'invoiceNumber'
+            ];
+            
+            fields.forEach(field => {
+                if (document.getElementById(field).value.trim() !== '') {
+                    progress += 100 / fields.length;
+                }
+            });
+            
+            // Check if at least one item has description and rate
+            let hasValidItem = false;
+            document.querySelectorAll('#itemsTableBody tr').forEach(row => {
+                const desc = row.querySelector('.item-desc').value.trim();
+                const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+                if (desc !== '' && rate > 0) {
+                    hasValidItem = true;
+                }
+            });
+            
+            if (hasValidItem) {
+                progress += 20;
+            }
+            
+            document.getElementById('formProgress').style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        function updateStats() {
+            // Calculate total revenue from all items
+            let totalRevenue = 0;
+            document.querySelectorAll('#itemsTableBody tr').forEach(row => {
+                const amount = parseFloat(row.querySelector('.item-amount').value) || 0;
+                totalRevenue += amount;
+            });
+            
+            // Add tax and subtract discount
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const taxAmount = (totalRevenue * taxRate) / 100;
+            totalRevenue = totalRevenue + taxAmount - discount;
+            
+            // Update stats
+            document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+            
+            // Calculate completion rate based on progress
+            const progressBar = document.getElementById('formProgress');
+            const completionRate = parseInt(progressBar.style.width) || 0;
+            document.getElementById('completionRate').textContent = `${completionRate}%`;
+            
+            // Update total invoices (simple counter)
+            const savedInvoices = localStorage.getItem('totalInvoices') || 0;
+            document.getElementById('totalInvoices').textContent = savedInvoices;
+        }
+
         function formatDate(dateString) {
             const options = { year: 'numeric', month: 'long', day: 'numeric' };
             return new Date(dateString).toLocaleDateString(undefined, options);
@@ -1140,6 +1404,11 @@
         function downloadPdf() {
             const { jsPDF } = window.jspdf;
             const invoiceElement = document.getElementById('invoicePreview');
+            
+            // Show loading state
+            const originalText = document.getElementById('downloadPdf').innerHTML;
+            document.getElementById('downloadPdf').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            document.getElementById('downloadPdf').disabled = true;
             
             html2canvas(invoiceElement, {
                 scale: 2,
@@ -1166,6 +1435,17 @@
 
                 const invoiceNumber = document.getElementById('invoiceNumber').value || 'invoice';
                 pdf.save(`${invoiceNumber}.pdf`);
+                
+                // Restore button state
+                document.getElementById('downloadPdf').innerHTML = originalText;
+                document.getElementById('downloadPdf').disabled = false;
+                
+                // Increment invoice counter
+                const currentCount = parseInt(localStorage.getItem('totalInvoices') || 0);
+                localStorage.setItem('totalInvoices', currentCount + 1);
+                updateStats();
+                
+                showNotification('PDF downloaded successfully!', 'success');
             });
         }
 
@@ -1180,6 +1460,7 @@
             // Reinitialize the app
             initializeEventListeners();
             updatePreview();
+            showNotification('Invoice printed successfully!', 'success');
         }
 
         function saveDraft() {
@@ -1261,6 +1542,8 @@
                 document.getElementById('invoiceNumber').value = 'INV-0001';
                 
                 updatePreview();
+                updateProgressBar();
+                updateStats();
                 showNotification('All fields cleared!', 'success');
             }
         }
@@ -1276,19 +1559,24 @@
                 padding: 16px 24px;
                 background: ${type === 'success' ? '#10b981' : '#ef4444'};
                 color: white;
-                border-radius: 8px;
-                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
                 z-index: 1000;
-                animation: slideIn 0.3s ease-out;
+                animation: slideInRight 0.3s ease-out;
+                font-weight: 600;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
             `;
             
             document.body.appendChild(notification);
             
             // Remove notification after 3 seconds
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease-in';
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
             }, 3000);
         }
@@ -1336,6 +1624,8 @@
                 document.getElementById('terms').value = invoiceData.terms || '';
                 
                 updatePreview();
+                updateProgressBar();
+                updateStats();
                 showNotification('Draft loaded successfully!', 'success');
             }
         }
@@ -1346,11 +1636,11 @@
         // Add CSS for notification animations
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes slideIn {
+            @keyframes slideInRight {
                 from { transform: translateX(100%); opacity: 0; }
                 to { transform: translateX(0); opacity: 1; }
             }
-            @keyframes slideOut {
+            @keyframes slideOutRight {
                 from { transform: translateX(0); opacity: 1; }
                 to { transform: translateX(100%); opacity: 0; }
             }
