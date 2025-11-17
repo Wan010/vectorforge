@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .invoice-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .preview-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .items-table th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .items-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .items-table input {
+            border: none;
+            padding: 8px;
+            width: 100%;
+            background: transparent;
+        }
+
+        .items-table input:focus {
+            border: 2px solid var(--secondary);
+            border-radius: 4px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .invoice-preview {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 2rem;
+            min-height: 500px;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .invoice-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .invoice-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .preview-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .preview-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .totals-section {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .grand-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-top: 2px solid var(--primary);
+            padding-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .invoice-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Invoice Generator Pro</h1>
+            <p class="subtitle">Create professional invoices in seconds</p>
+        </header>
+
+        <div class="app-container">
+            <!-- Invoice Form Section -->
+            <div class="invoice-form">
+                <div class="form-group">
+                    <h2>Business Information</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="businessName">Business Name</label>
+                    <input type="text" id="businessName" placeholder="Your Business Name">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessAddress">Address</label>
+                        <input type="text" id="businessAddress" placeholder="Business Address">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessEmail">Email</label>
+                        <input type="email" id="businessEmail" placeholder="business@example.com">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="businessPhone">Phone</label>
+                        <input type="tel" id="businessPhone" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="businessWebsite">Website</label>
+                        <input type="text" id="businessWebsite" placeholder="www.example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h2>Client Information</h2>
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientName">Client Name</label>
+                    <input type="text" id="clientName" placeholder="Client's Name or Company">
+                </div>
+                
+                <div class="form-group">
+                    <label for="clientAddress">Client Address</label>
+                    <input type="text" id="clientAddress" placeholder="Client's Address">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clientEmail">Client Email</label>
+                        <input type="email" id="clientEmail" placeholder="client@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientPhone">Client Phone</label>
+                        <input type="tel" id="clientPhone" placeholder="Client Phone Number">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h2>Invoice Details</h2>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="invoiceNumber">Invoice Number</label>
+                        <input type="text" id="invoiceNumber" value="INV-0001">
+                    </div>
+                    <div class="form-group">
+                        <label for="invoiceDate">Invoice Date</label>
+                        <input type="date" id="invoiceDate">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dueDate">Due Date</label>
+                        <input type="date" id="dueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentTerms">Payment Terms</label>
+                        <select id="paymentTerms">
+                            <option value="Due upon receipt">Due upon receipt</option>
+                            <option value="Net 15">Net 15</option>
+                            <option value="Net 30" selected>Net 30</option>
+                            <option value="Net 60">Net 60</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h2>Items & Services</h2>
+                </div>
+                
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th width="100">Quantity</th>
+                            <th width="120">Rate ($)</th>
+                            <th width="120">Amount ($)</th>
+                            <th width="50"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <tr>
+                            <td><input type="text" class="item-desc" placeholder="Item description"></td>
+                            <td><input type="number" class="item-qty" value="1" min="1"></td>
+                            <td><input type="number" class="item-rate" value="0" step="0.01" min="0"></td>
+                            <td><input type="text" class="item-amount" value="0.00" readonly></td>
+                            <td><button type="button" class="btn btn-danger remove-item">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button type="button" class="btn btn-primary" id="addItem">+ Add Item</button>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taxRate">Tax Rate (%)</label>
+                        <input type="number" id="taxRate" value="0" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="discount">Discount ($)</label>
+                        <input type="number" id="discount" value="0" step="0.01" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes</label>
+                    <textarea id="notes" rows="3" placeholder="Thank you for your business!"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="terms">Terms & Conditions</label>
+                    <textarea id="terms" rows="3" placeholder="Payment due within 30 days. Late fees may apply."></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" id="downloadPdf">Download PDF</button>
+                    <button type="button" class="btn btn-primary" id="printInvoice">Print Invoice</button>
+                    <button type="button" class="btn btn-primary" id="saveDraft">Save Draft</button>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="preview-section">
+                <h2>Invoice Preview</h2>
+                <div class="invoice-preview" id="invoicePreview">
+                    <div class="invoice-header">
+                        <div class="invoice-title">INVOICE</div>
+                        <div>
+                            <div><strong>Invoice #:</strong> <span id="previewInvoiceNumber">INV-0001</span></div>
+                            <div><strong>Date:</strong> <span id="previewInvoiceDate">-</span></div>
+                            <div><strong>Due Date:</strong> <span id="previewDueDate">-</span></div>
+                        </div>
+                    </div>
+
+                    <div class="invoice-details">
+                        <div>
+                            <strong>From:</strong>
+                            <div id="previewFrom">
+                                <div id="previewBusinessName">Your Business Name</div>
+                                <div id="previewBusinessAddress">Business Address</div>
+                                <div id="previewBusinessEmail">business@example.com</div>
+                                <div id="previewBusinessPhone">+1 (555) 123-4567</div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>To:</strong>
+                            <div id="previewTo">
+                                <div id="previewClientName">Client's Name</div>
+                                <div id="previewClientAddress">Client's Address</div>
+                                <div id="previewClientEmail">client@example.com</div>
+                                <div id="previewClientPhone">Client Phone</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th width="80">Qty</th>
+                                <th width="100">Rate</th>
+                                <th width="100">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewItems">
+                            <tr>
+                                <td>Sample Item</td>
+                                <td>1</td>
+                                <td>$100.00</td>
+                                <td>$100.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="totals-section">
+                        <div class="total-row">
+                            <div>Subtotal:</div>
+                            <div id="previewSubtotal">$0.00</div>
+                        </div>
+                        <div class="total-row">
+                            <div>Tax (<span id="previewTaxRate">0</span>%):</div>
+                            <div id="previewTax">$0.00</div>
+                        </div>
+                        <div class="total-row">
+                            <div>Discount:</div>
+                            <div id="previewDiscount">$0.00</div>
+                        </div>
+                        <div class="total-row grand-total">
+                            <div>Grand Total:</div>
+                            <div id="previewGrandTotal">$0.00</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <div><strong>Payment Terms:</strong> <span id="previewPaymentTerms">Net 30</span></div>
+                        <div style="margin-top: 1rem;"><strong>Notes:</strong></div>
+                        <div id="previewNotes">Thank you for your business!</div>
+                        <div style="margin-top: 1rem;"><strong>Terms & Conditions:</strong></div>
+                        <div id="previewTerms">Payment due within 30 days. Late fees may apply.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('invoiceDate').value = today;
+            
+            // Set due date to 30 days from today
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 30);
+            document.getElementById('dueDate').value = dueDate.toISOString().split('T')[0];
+            
+            // Initialize event listeners
+            initializeEventListeners();
+            
+            // Do initial calculation
+            calculateTotals();
+            updatePreview();
+        });
+
+        function initializeEventListeners() {
+            // Add item button
+            document.getElementById('addItem').addEventListener('click', addNewItem);
+            
+            // Input change listeners for real-time preview
+            const inputFields = [
+                'businessName', 'businessAddress', 'businessEmail', 'businessPhone', 'businessWebsite',
+                'clientName', 'clientAddress', 'clientEmail', 'clientPhone',
+                'invoiceNumber', 'invoiceDate', 'dueDate', 'paymentTerms',
+                'taxRate', 'discount', 'notes', 'terms'
+            ];
+            
+            inputFields.forEach(field => {
+                document.getElementById(field).addEventListener('input', updatePreview);
+            });
+            
+            // Item calculation listeners
+            document.addEventListener('input', function(e) {
+                if (e.target.classList.contains('item-desc') || 
+                    e.target.classList.contains('item-qty') || 
+                    e.target.classList.contains('item-rate')) {
+                    calculateItemAmount(e.target);
+                    calculateTotals();
+                    updatePreview();
+                }
+            });
+            
+            // Remove item listener (delegated)
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    removeItem(e.target);
+                    calculateTotals();
+                    updatePreview();
+                }
+            });
+            
+            // Action buttons
+            document.getElementById('downloadPdf').addEventListener('click', downloadPdf);
+            document.getElementById('printInvoice').addEventListener('click', printInvoice);
+            document.getElementById('saveDraft').addEventListener('click', saveDraft);
+        }
+
+        function addNewItem() {
+            const tbody = document.getElementById('itemsTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="item-desc" placeholder="Item description"></td>
+                <td><input type="number" class="item-qty" value="1" min="1"></td>
+                <td><input type="number" class="item-rate" value="0" step="0.01" min="0"></td>
+                <td><input type="text" class="item-amount" value="0.00" readonly></td>
+                <td><button type="button" class="btn btn-danger remove-item">×</button></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function removeItem(button) {
+            const row = button.closest('tr');
+            // Don't remove if it's the last row
+            if (document.querySelectorAll('#itemsTableBody tr').length > 1) {
+                row.remove();
+            }
+        }
+
+        function calculateItemAmount(input) {
+            const row = input.closest('tr');
+            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+            const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+            const amount = qty * rate;
+            row.querySelector('.item-amount').value = amount.toFixed(2);
+        }
+
+        function calculateTotals() {
+            let subtotal = 0;
+            
+            document.querySelectorAll('#itemsTableBody tr').forEach(row => {
+                const amount = parseFloat(row.querySelector('.item-amount').value) || 0;
+                subtotal += amount;
+            });
+            
+            const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const taxAmount = (subtotal * taxRate) / 100;
+            const grandTotal = subtotal + taxAmount - discount;
+            
+            // Update preview elements
+            document.getElementById('previewSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('previewTax').textContent = `$${taxAmount.toFixed(2)}`;
+            document.getElementById('previewDiscount').textContent = `-$${discount.toFixed(2)}`;
+            document.getElementById('previewGrandTotal').textContent = `$${grandTotal.toFixed(2)}`;
+        }
+
+        function updatePreview() {
+            // Update business info
+            document.getElementById('previewBusinessName').textContent = 
+                document.getElementById('businessName').value || 'Your Business Name';
+            document.getElementById('previewBusinessAddress').textContent = 
+                document.getElementById('businessAddress').value || 'Business Address';
+            document.getElementById('previewBusinessEmail').textContent = 
+                document.getElementById('businessEmail').value || 'business@example.com';
+            document.getElementById('previewBusinessPhone').textContent = 
+                document.getElementById('businessPhone').value || '+1 (555) 123-4567';
+            
+            // Update client info
+            document.getElementById('previewClientName').textContent = 
+                document.getElementById('clientName').value || "Client's Name";
+            document.getElementById('previewClientAddress').textContent = 
+                document.getElementById('clientAddress').value || "Client's Address";
+            document.getElementById('previewClientEmail').textContent = 
+                document.getElementById('clientEmail').value || 'client@example.com';
+            document.getElementById('previewClientPhone').textContent = 
+                document.getElementById('clientPhone').value || 'Client Phone';
+            
+            // Update invoice details
+            document.getElementById('previewInvoiceNumber').textContent = 
+                document.getElementById('invoiceNumber').value || 'INV-0001';
+            
+            const invoiceDate = document.getElementById('invoiceDate').value;
+            document.getElementById('previewInvoiceDate').textContent = 
+                invoiceDate ? formatDate(invoiceDate) : '-';
+            
+            const dueDate = document.getElementById('dueDate').value;
+            document.getElementById('previewDueDate').textContent = 
+                dueDate ? formatDate(dueDate) : '-';
+            
+            document.getElementById('previewPaymentTerms').textContent = 
+                document.getElementById('paymentTerms').value;
+            
+            // Update items in preview
+            const previewItems = document.getElementById('previewItems');
+            previewItems.innerHTML = '';
+            
+            document.querySelectorAll('#itemsTableBody tr').forEach(row => {
+                const desc = row.querySelector('.item-desc').value || 'Item description';
+                const qty = row.querySelector('.item-qty').value || '0';
+                const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
+                const amount = parseFloat(row.querySelector('.item-amount').value) || 0;
+                
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${desc}</td>
+                    <td>${qty}</td>
+                    <td>$${rate.toFixed(2)}</td>
+                    <td>$${amount.toFixed(2)}</td>
+                `;
+                previewItems.appendChild(newRow);
+            });
+            
+            // Update tax rate display
+            document.getElementById('previewTaxRate').textContent = 
+                document.getElementById('taxRate').value;
+            
+            // Update notes and terms
+            document.getElementById('previewNotes').textContent = 
+                document.getElementById('notes').value || 'Thank you for your business!';
+            document.getElementById('previewTerms').textContent = 
+                document.getElementById('terms').value || 'Payment due within 30 days. Late fees may apply.';
+            
+            // Recalculate totals
+            calculateTotals();
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function downloadPdf() {
+            const { jsPDF } = window.jspdf;
+            const invoiceElement = document.getElementById('invoicePreview');
+            
+            html2canvas(invoiceElement, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                const invoiceNumber = document.getElementById('invoiceNumber').value || 'invoice';
+                pdf.save(`${invoiceNumber}.pdf`);
+            });
+        }
+
+        function printInvoice() {
+            const invoiceElement = document.getElementById('invoicePreview');
+            const originalContents = document.body.innerHTML;
+            
+            document.body.innerHTML = invoiceElement.outerHTML;
+            window.print();
+            document.body.innerHTML = originalContents;
+            
+            // Reinitialize the app
+            initializeEventListeners();
+            updatePreview();
+        }
+
+        function saveDraft() {
+            const invoiceData = {
+                business: {
+                    name: document.getElementById('businessName').value,
+                    address: document.getElementById('businessAddress').value,
+                    email: document.getElementById('businessEmail').value,
+                    phone: document.getElementById('businessPhone').value,
+                    website: document.getElementById('businessWebsite').value
+                },
+                client: {
+                    name: document.getElementById('clientName').value,
+                    address: document.getElementById('clientAddress').value,
+                    email: document.getElementById('clientEmail').value,
+                    phone: document.getElementById('clientPhone').value
+                },
+                invoice: {
+                    number: document.getElementById('invoiceNumber').value,
+                    date: document.getElementById('invoiceDate').value,
+                    dueDate: document.getElementById('dueDate').value,
+                    paymentTerms: document.getElementById('paymentTerms').value
+                },
+                items: Array.from(document.querySelectorAll('#itemsTableBody tr')).map(row => ({
+                    description: row.querySelector('.item-desc').value,
+                    quantity: row.querySelector('.item-qty').value,
+                    rate: row.querySelector('.item-rate').value,
+                    amount: row.querySelector('.item-amount').value
+                })),
+                taxRate: document.getElementById('taxRate').value,
+                discount: document.getElementById('discount').value,
+                notes: document.getElementById('notes').value,
+                terms: document.getElementById('terms').value
+            };
+            
+            localStorage.setItem('invoiceDraft', JSON.stringify(invoiceData));
+            alert('Draft saved successfully!');
+        }
+
+        // Optional: Load draft if exists
+        function loadDraft() {
+            const draft = localStorage.getItem('invoiceDraft');
+            if (draft) {
+                const invoiceData = JSON.parse(draft);
+                
+                // Populate business info
+                document.getElementById('businessName').value = invoiceData.business.name || '';
+                document.getElementById('businessAddress').value = invoiceData.business.address || '';
+                document.getElementById('businessEmail').value = invoiceData.business.email || '';
+                document.getElementById('businessPhone').value = invoiceData.business.phone || '';
+                document.getElementById('businessWebsite').value = invoiceData.business.website || '';
+                
+                // Populate client info
+                document.getElementById('clientName').value = invoiceData.client.name || '';
+                document.getElementById('clientAddress').value = invoiceData.client.address || '';
+                document.getElementById('clientEmail').value = invoiceData.client.email || '';
+                document.getElementById('clientPhone').value = invoiceData.client.phone || '';
+                
+                // Populate invoice details
+                document.getElementById('invoiceNumber').value = invoiceData.invoice.number || '';
+                document.getElementById('invoiceDate').value = invoiceData.invoice.date || '';
+                document.getElementById('dueDate').value = invoiceData.invoice.dueDate || '';
+                document.getElementById('paymentTerms').value = invoiceData.invoice.paymentTerms || '';
+                
+                // Populate items
+                document.getElementById('itemsTableBody').innerHTML = '';
+                invoiceData.items.forEach(item => {
+                    addNewItem();
+                    const rows = document.querySelectorAll('#itemsTableBody tr');
+                    const lastRow = rows[rows.length - 1];
+                    lastRow.querySelector('.item-desc').value = item.description || '';
+                    lastRow.querySelector('.item-qty').value = item.quantity || 1;
+                    lastRow.querySelector('.item-rate').value = item.rate || 0;
+                    lastRow.querySelector('.item-amount').value = item.amount || 0;
+                });
+                
+                // Populate other fields
+                document.getElementById('taxRate').value = invoiceData.taxRate || 0;
+                document.getElementById('discount').value = invoiceData.discount || 0;
+                document.getElementById('notes').value = invoiceData.notes || '';
+                document.getElementById('terms').value = invoiceData.terms || '';
+                
+                updatePreview();
+            }
+        }
+
+        // Load draft on page load
+        window.addEventListener('load', loadDraft);
+    </script>
+</body>
+</html>
